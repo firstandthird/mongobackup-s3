@@ -1,7 +1,8 @@
 #!/bin/bash
 
-DATE=$(date +%Y%m%d_%H%M%S)
-FILE='/backup/backup-$date.tar.gz'
+
+echo $1
+echo $#
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
   echo "AWS_ACCESS_KEY_ID must be set"
@@ -15,6 +16,25 @@ if [ -z "$S3BUCKET" ]; then
   echo "S3BUCKET must be set"
 fi
 
-mongodump --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
-tar -zcvf $FILE dump/
-aws s3api put-object --bucket $S3BUCKET --key $DATE.tar.gz --body $FILE
+
+if [ "$1" == "backup" ]; then
+
+  DATE=$(date +%Y%m%d_%H%M%S)
+  FILE='/backup/backup-$date.tar.gz'
+
+  mongodump --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
+  tar -zcvf $FILE dump/
+  aws s3api put-object --bucket $S3BUCKET --key $DATE.tar.gz --body $FILE
+  
+else
+
+  FILE=$1
+
+  aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
+  ls -l /backup/$FILE
+  echo 'aws done'
+  mkdir -p /backup/dump
+  echo 'start tar $FILE'
+  tar -zxvf /backup/$FILE -C /backup/dump
+  mongorestore --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
+fi
