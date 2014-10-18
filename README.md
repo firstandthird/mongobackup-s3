@@ -11,13 +11,13 @@ docker build -t mongodumpandrestore-s3 git://github.com/rooseveltlai/mongodumpan
 
 ## Usage
 
-Backup:
+Backup to S3:
 
 ```
 docker run --rm --link mongo:mongo --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket mongodumpandrestore-s3
 ```
 
-Restore:
+Restore (from file 20141017_221942.tar.gz on S3):
 
 ```
 docker run --rm --link mongo:mongo --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket mongodumpandrestore-s3 20141017_221942.tar.gz

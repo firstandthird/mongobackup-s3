@@ -8,5 +8,4 @@ RUN mkdir -p /backup/data
 ADD backup /backup/run
 WORKDIR /backup
 
-
 ENTRYPOINT ["./run"]
