@@ -22,6 +22,11 @@ if [ "$1" == "backup" ]; then
   tar -zcvf $FILE dump/
   aws s3api put-object --bucket $S3BUCKET --key $DATE.tar.gz --body $FILE
   
+
+elif [ "$1" == "list" ]; then
+	echo "Listing backups..."
+
+	aws s3api list-objects --bucket $S3BUCKET --query 'Contents[].{Key: Key, Size: Size}'
 else
   echo "Starting restore"
 

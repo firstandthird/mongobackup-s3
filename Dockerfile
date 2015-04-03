@@ -9,4 +9,4 @@ ADD backup /backup/run
 WORKDIR /backup
 
 ENTRYPOINT ["./run"]
-CMD ['backup']
+CMD ["backup"]
