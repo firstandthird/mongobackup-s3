@@ -1,8 +1,5 @@
 #!/bin/bash
 
-DATE=$(date +%Y%m%d_%H%M%S)
-FILE='/backup/backup-$date.tar.gz'
-
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
   echo "AWS_ACCESS_KEY_ID must be set"
 fi
@@ -15,6 +12,27 @@ if [ -z "$S3BUCKET" ]; then
   echo "S3BUCKET must be set"
 fi
 
-mongodump --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
-tar -zcvf $FILE dump/
-aws s3api put-object --bucket $S3BUCKET --key $DATE.tar.gz --body $FILE
+if [ "$1" == "backup" ]; then
+  echo "Starting backup..."
+
+  DATE=$(date +%Y%m%d_%H%M%S)
+  FILE='/backup/backup-$date.tar.gz'
+
+  mongodump --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
+  tar -zcvf $FILE dump/
+  aws s3api put-object --bucket $S3BUCKET --key $DATE.tar.gz --body $FILE
+  
+
+elif [ "$1" == "list" ]; then
+	echo "Listing backups..."
+
+	aws s3api list-objects --bucket $S3BUCKET --query 'Contents[].{Key: Key, Size: Size}' --output table
+else
+  echo "Starting restore"
+
+  FILE=$1
+
+  aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
+  tar -zxvf /backup/$FILE -C /backup
+  mongorestore -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT dump/
+fi
