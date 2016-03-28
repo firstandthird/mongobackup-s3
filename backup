@@ -50,9 +50,9 @@ if [ "$1" == "backup" ]; then
   echo "Cleaning up..."
   rm -rf dump/ $FILE
 elif [ "$1" == "list" ]; then
-        echo "Listing backups..."
+  echo "Listing backups..."
 
-        aws s3api list-objects --bucket $S3BUCKET --query 'Contents[].{Key: Key, Size: Size}' --output table
+  aws s3api list-objects --bucket $S3BUCKET --query 'Contents[].{Key: Key, Size: Size}' --output table
 else
   echo "Starting restore"
 
