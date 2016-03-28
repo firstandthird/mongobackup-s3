@@ -37,6 +37,10 @@ if [[ -n "$MONGO_PORT_27017_TCP_PORT" ]]; then
   MONGO_PORT=$MONGO_PORT_27017_TCP_PORT
 fi
 
+if [[ -n "$DB" ]]; then
+  DB_ARG="--db $DB"
+fi
+
 if [ "$1" == "backup" ]; then
   echo "Starting backup..."
 
@@ -44,7 +48,7 @@ if [ "$1" == "backup" ]; then
   FILENAME=$FILEPREFIX$DATE.tar.gz
   FILE=/backup/backup-$FILENAME
 
-  mongodump --quiet -h $MONGO_HOST -p $MONGO_PORT
+  mongodump --quiet -h $MONGO_HOST -p $MONGO_PORT $DB_ARG
   tar -zcvf $FILE dump/
   aws s3api put-object --bucket $S3BUCKET --key $FILENAME --body $FILE
   echo "Cleaning up..."

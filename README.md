@@ -5,7 +5,7 @@ A simple docker container to backup MongoDB to S3, restore backups, and list bac
 ## Usage
 
 ### Backup
-To initiate a backup:
+To initiate a backup: (you can now pass in `--env DB=[db]` to only backup a specific db)
 
 ```
 docker run --rm --link mongo:mongo --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket firstandthird/mongobackup-s3
