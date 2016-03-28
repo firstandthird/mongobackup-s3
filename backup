@@ -20,6 +20,23 @@ if [ -z "$FILEPREFIX" ]; then
   FILEPREFIX=''
 fi
 
+if [ -z "$MONGO_HOST" ]; then
+  MONGO_HOST="mongo"
+fi
+
+if [ -z "$MONGO_PORT" ]; then
+  MONGO_PORT="27017"
+fi
+
+#support for legacy env vars
+if [[ -n "$MONGO_PORT_27017_TCP_ADDR" ]]; then
+  MONGO_HOST=$MONGO_PORT_27017_TCP_ADDR
+fi
+
+if [[ -n "$MONGO_PORT_27017_TCP_PORT" ]]; then
+  MONGO_PORT=$MONGO_PORT_27017_TCP_PORT
+fi
+
 if [ "$1" == "backup" ]; then
   echo "Starting backup..."
 
@@ -27,7 +44,7 @@ if [ "$1" == "backup" ]; then
   FILENAME=$FILEPREFIX$DATE.tar.gz
   FILE=/backup/backup-$FILENAME
 
-  mongodump --quiet -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT
+  mongodump --quiet -h $MONGO_HOST -p $MONGO_PORT
   tar -zcvf $FILE dump/
   aws s3api put-object --bucket $S3BUCKET --key $FILENAME --body $FILE
   echo "Cleaning up..."
@@ -43,7 +60,7 @@ else
 
   aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
   tar -zxvf /backup/$FILE -C /backup
-  mongorestore -h $MONGO_PORT_27017_TCP_ADDR -p $MONGO_PORT_27017_TCP_PORT dump/
+  mongorestore -h $MONGO_HOST -p $MONGO_PORT dump/
   echo "Cleaning up..."
   rm -rf dump/ /backup/$FILE
 fi
