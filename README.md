@@ -29,6 +29,14 @@ To list the backups on S3:
 docker run --rm --link mongo:mongo --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket firstandthird/mongobackup-s3 list
 ```
 
+## Restore Latest
+To restore the latest backup on S3:
+```
+docker run --rm --link mongo:mongo --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket firstandthird/mongobackup-s3 latest
+```
+
+The sort order is used to determine the latest backup. If a ``FILEPREFIX`` is defined, this will filter the bucket list results. If using a custom ``DATEFORMAT``, ensure the sort order will still represent the correct date order.
+
 ## Restore
 To restore a given backup, where `[backup-file-name]` is the name of the backup file you would like to restore:
 
