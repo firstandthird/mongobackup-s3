@@ -1,4 +1,11 @@
-#!/bin/bash
+
+n restore {
+  aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
+  tar -zxvf /backup/$FILE -C /backup
+  mongorestore -h $MONGO_HOST -p $MONGO_PORT dump/
+  echo "Cleaning up..."
+  rm -rf dump/ /backup/$FILE
+}
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
   echo "AWS_ACCESS_KEY_ID must be set"
@@ -57,14 +64,15 @@ elif [ "$1" == "list" ]; then
   echo "Listing backups..."
 
   aws s3api list-objects --bucket $S3BUCKET --query 'Contents[].{Key: Key, Size: Size}' --output table
+elif [ "$1" == "latest" ]; then
+  echo "Determining backup to restore..."
+
+  : ${FILE:=$(aws s3 ls s3://$S3BUCKET | awk -F " " '{print $4}' | grep ^$FILEPREFIX | sort -r | head -n1)}
+  echo "Restoring $FILE."
+  restore
 else
   echo "Starting restore"
 
   FILE=$1
-
-  aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
-  tar -zxvf /backup/$FILE -C /backup
-  mongorestore -h $MONGO_HOST -p $MONGO_PORT dump/
-  echo "Cleaning up..."
-  rm -rf dump/ /backup/$FILE
+  restore
 fi
