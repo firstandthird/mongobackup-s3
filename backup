@@ -1,9 +1,16 @@
 #!/bin/bash
 
+if [ -z "$MONGO_USER" ]; then
+  MONGO_CRED=''
+else
+  MONGO_CRED="-u $MONGO_USER -p $MONGO_PASSWORD --authenticationDatabase $MONGOD_AUTH_DB"
+fi
+
+
 function restore {
   aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
   tar -zxvf /backup/$FILE -C /backup
-  mongorestore -h $MONGO_HOST -p $MONGO_PORT dump/
+  mongorestore -h $MONGO_HOST -p $MONGO_PORT $MONGO_CRED dump/
   echo "Cleaning up..."
   rm -rf dump/ /backup/$FILE
 }
@@ -56,7 +63,7 @@ if [ "$1" == "backup" ]; then
   FILENAME=$FILEPREFIX$DATE.tar.gz
   FILE=/backup/backup-$FILENAME
 
-  mongodump --quiet -h $MONGO_HOST -p $MONGO_PORT $DB_ARG
+  mongodump --quiet -h $MONGO_HOST -p $MONGO_PORT $MONGO_CRED $DB_ARG
   tar -zcvf $FILE dump/
   aws s3api put-object --bucket $S3BUCKET --key $FILENAME --body $FILE
   echo "Cleaning up..."
