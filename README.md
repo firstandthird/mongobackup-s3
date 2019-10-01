@@ -22,6 +22,12 @@ To add a file like ``mongodb.2016-02-08-03-10-20.tar.gz`` to your AWS bucket:
 docker run --rm --link mongo:mongo --env DATEFORMAT=%Y-%m-%d-%H-%M-%S --env FILEPREFIX=mongodb. --env AWS_ACCESS_KEY_ID=123 --env AWS_SECRET_ACCESS_KEY=123 --env S3BUCKET=bucket firstandthird/mongobackup-s3
 ```
 
+## Credentials
+You can set the following env variables if you want to authenticate:
+```
+-e MONGO_USER=exampleuser -e MONGO_PASSWORD=examplepassword -e MONGOD_AUTH_DB=exampleAuthDb
+```
+
 ## List
 To list the backups on S3:
 
